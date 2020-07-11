@@ -1,0 +1,111 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS = ["native/rustystream-ffi"]
+LIB_OUT_DIR = "debug"
+DEV = true
+RELEASE = false
+
+[env.release]
+RELEASE = true
+DEV = false
+LIB_OUT_DIR = "release"
+
+[tasks.test-flow]
+disabled = true
+
+[tasks.build]
+description = "Runs the rust compiler."
+category = "Build"
+dependencies = [
+  "build-lib",
+  "build-lib-release",
+  "setup",
+  "post-build",
+  "cbindgen",
+  "dart-bindgen"
+  ]
+
+[tasks.build-lib]
+description = "Build lib."
+category = "Build"
+private = true
+condition = { env_true = ["DEV"] }
+command = "cargo"
+args = ["build"]
+
+[tasks.build-lib-release]
+description = "Build lib."
+category = "Build"
+private = true
+condition = { env_true = ["RELEASE"] }
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.setup]
+private = true
+script_runner = "@duckscript"
+script = [
+    """
+    mkdir ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/build
+    """,
+]
+
+[tasks.post-build.windows]
+private = true
+script_runner = "@duckscript"
+script = [
+    """
+    cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/${LIB_OUT_DIR}/${CARGO_MAKE_CRATE_FS_NAME}.dll \
+    ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/build/${CARGO_MAKE_CRATE_FS_NAME}.dll
+    """,
+]
+
+[tasks.post-build.linux]
+private = true
+script_runner = "@duckscript"
+script = [
+    """
+    cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/${LIB_OUT_DIR}/lib${CARGO_MAKE_CRATE_FS_NAME}.so \
+    ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/build/lib${CARGO_MAKE_CRATE_FS_NAME}.so
+    """,
+]
+
+[tasks.post-build.mac]
+private = true
+script_runner = "@duckscript"
+script = [
+    """
+    cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/${LIB_OUT_DIR}/lib${CARGO_MAKE_CRATE_FS_NAME}.dylib \
+    ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/build/lib${CARGO_MAKE_CRATE_FS_NAME}.dylib
+    """,
+]
+
+[tasks.cbindgen]
+command = "cbindgen"
+args = [
+  "--config",
+  "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/cbindgen.toml",
+  "--crate",
+  "${CARGO_MAKE_CRATE_CURRENT_WORKSPACE_MEMBER}",
+  "--output",
+  "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/native/${CARGO_MAKE_CRATE_CURRENT_WORKSPACE_MEMBER}/binding.h"
+]
+
+
+[tasks.dart-bindgen]
+command = "dart-bindgen"
+args = [
+  "--input",
+  "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/native/${CARGO_MAKE_CRATE_CURRENT_WORKSPACE_MEMBER}/binding.h",
+  "--output",
+  "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/lib/ffi.dart",
+  "--name",
+  "lib${CARGO_MAKE_CRATE_FS_NAME}",
+  "--windows",
+  "build/${CARGO_MAKE_CRATE_FS_NAME}.dll",
+   "--linux",
+  "build/lib${CARGO_MAKE_CRATE_FS_NAME}.so",
+  "--macos",
+  "build/lib${CARGO_MAKE_CRATE_FS_NAME}.so",
+  "--allo-isolate"
+]

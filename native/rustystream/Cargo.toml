@@ -1,0 +1,10 @@
+[package]
+name = "rustystream"
+version = "0.1.0"
+authors = ["Shady Khalifa <shekohex@gmail.com>"]
+edition = "2018"
+
+
+[dependencies]
+futures = "^0.3"
+serde = { version = "^1", features = ["derive"] }
