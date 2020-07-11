@@ -1,15 +1,15 @@
 /// bindings for `librustystream_ffi`
 
-import 'dart:io';
-import 'package:ffi/ffi.dart' as ffi;
 import 'dart:ffi';
+import 'package:ffi/ffi.dart' as ffi;
+import 'dart:io';
 
 // ignore_for_file: unused_import, camel_case_types, non_constant_identifier_names
 final DynamicLibrary _dl = _open();
 DynamicLibrary _open() {
   if (Platform.isWindows) return DynamicLibrary.open('build/rustystream_ffi.dll');
   if (Platform.isLinux) return DynamicLibrary.open('build/librustystream_ffi.so');
-  if (Platform.isMacOS) return DynamicLibrary.open('build/librustystream_ffi.so');
+  if (Platform.isMacOS) return DynamicLibrary.open('build/librustystream_ffi.dylib');
   throw UnsupportedError('This platform is not supported.');
 }
 

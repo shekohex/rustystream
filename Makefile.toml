@@ -106,6 +106,6 @@ args = [
    "--linux",
   "build/lib${CARGO_MAKE_CRATE_FS_NAME}.so",
   "--macos",
-  "build/lib${CARGO_MAKE_CRATE_FS_NAME}.so",
+  "build/lib${CARGO_MAKE_CRATE_FS_NAME}.dylib",
   "--allo-isolate"
 ]
